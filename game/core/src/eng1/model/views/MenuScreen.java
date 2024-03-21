@@ -11,15 +11,23 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.eng1.game.HeslingtonHustle;
 
-import com.eng1.game.ENG1;
-
+/**
+ * Represents the main menu screen of the game.
+ * Provides options for starting a new game, accessing preferences, and exiting the game.
+ */
 public class MenuScreen extends ScreenAdapter {
-    private ENG1 parent;
-    private Stage stage;
-    private Label titleLabel;
+    private HeslingtonHustle parent; // Field to store the orchestrator of the game
+    private Stage stage; // Stage for handling UI elements
+    private Label titleLabel; // Label for displaying the game title
 
-    public MenuScreen(ENG1 game) {
+    /**
+     * Constructor for the MenuScreen class.
+     * Initializes the parent orchestrator and creates a new stage for UI rendering.
+     * @param game The orchestrator of the game.
+     */
+    public MenuScreen(HeslingtonHustle game) {
         parent = game;
         stage = new Stage(new ScreenViewport());
     }
@@ -37,7 +45,7 @@ public class MenuScreen extends ScreenAdapter {
         Skin skin = new Skin(Gdx.files.internal("skin/uiskin.json"));
 
         // Create buttons
-        titleLabel = new Label("IDK GAME NAME", skin);
+        titleLabel = new Label("Heslington Hustle", skin);
         TextButton newGame = new TextButton("New Game", skin);
         TextButton preferences = new TextButton("Preferences", skin);
         TextButton exit = new TextButton("Exit", skin);
@@ -52,6 +60,8 @@ public class MenuScreen extends ScreenAdapter {
         table.add(exit).fillX().uniformX();
 
         // Create button listeners
+
+        // Exits the game when exit is clicked
         exit.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -59,17 +69,19 @@ public class MenuScreen extends ScreenAdapter {
             }
         });
 
+        // Changes to character screen when new game is clicked
         newGame.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                parent.changeScreen(ENG1.APPLICATION);
+                parent.changeScreen(HeslingtonHustle.CHARACTER);
             }
         });
 
+        // Changes to preferences screen when preferences is clicked
         preferences.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                parent.changeScreen(ENG1.PREFERENCES);
+                parent.changeScreen(HeslingtonHustle.PREFERENCES);
             }
         });
     }
