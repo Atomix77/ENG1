@@ -3,71 +3,42 @@ package com.eng1.game;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import eng1.model.views.*;
+import com.eng1.game.assets.images.ImageAssets;
+import com.eng1.game.assets.maps.MapAssets;
+import com.eng1.game.assets.skins.SkinAssets;
+import com.eng1.game.audio.AudioManager;
+import com.eng1.game.audio.music.MusicManager;
+import com.eng1.game.audio.sounds.SoundsManager;
+import com.eng1.game.game.player.Statistics;
+import com.eng1.game.screens.*;
+import lombok.Getter;
 
 /**
  * The main game class responsible for managing screens.
+ *
+ * @since v2 <p>
+ * -- now uses a singleton pattern to ensure only one instance of the game is running. <p>
+ * -- now uses the {@link Screens} enum to switch screens and this class no longer stores all the screens <p>
+ * -- removed changeScreen() as {@link Screens} enum now handles screen switching <p>
  */
 public class HeslingtonHustle extends Game {
-	private LoadingScreen loadingScreen;
-	private PreferencesScreen preferencesScreen;
-	private MenuScreen menuScreen;
-	private MainScreen mainScreen;
-	private EndScreen endScreen;
-	private AppPreferences preferences;
-	private CharacterScreen characterScreen;
+	@Getter
+	private static HeslingtonHustle instance;
 
-	// Screen constants
-	public final static int MENU = 0;
-	public final static int PREFERENCES = 1;
-	public final static int APPLICATION = 2;
-	public final static int ENDGAME = 3;
-	public final static int CHARACTER = 4;
-	
+	public HeslingtonHustle() {
+		super();
+		instance = this;
+	}
+
 	@Override
 	public void create() {
-		loadingScreen = new LoadingScreen(this);
-		setScreen(loadingScreen);
-		preferences = new AppPreferences();
-		Activity.setGameInstance(this); // Set the game instance in Activity
-	}
 
-	/**
-	 * Retrieves the preferences instance.
-	 * @return The preferences instance.
-	 */
-	public AppPreferences getPreferences() {
-		return this.preferences;
-	}
 
-	/**
-	 * Changes the current screen based on the specified screen constant.
-	 * @param screen The screen constant indicating the screen to switch to.
-	 *
-	 */
-	public void changeScreen(int screen) {
-		switch (screen) {
-			case MENU:
-				if (menuScreen == null) menuScreen = new MenuScreen(this);
-				setScreen(menuScreen);
-				break;
-			case PREFERENCES:
-				if (preferencesScreen == null) preferencesScreen = new PreferencesScreen(this);
-				setScreen(preferencesScreen);
-				break;
-			case APPLICATION:
-				if (mainScreen == null) mainScreen = new MainScreen(this);
-				setScreen(mainScreen);
-				break;
-			case ENDGAME:
-				if (endScreen == null) endScreen = new EndScreen(this);
-				setScreen(endScreen);
-				break;
-			case CHARACTER:
-				if (characterScreen == null) characterScreen = new CharacterScreen(this);
-				setScreen(characterScreen);
-				break;
-		}
+		AudioManager musicManager = MusicManager.getInstance();
+		musicManager.onEnable();
+		AudioManager soundManager = SoundsManager.getInstance();
+		soundManager.onEnable();
+		Screens.LOADING.setAsCurrent();
 	}
 
 	@Override
@@ -75,13 +46,30 @@ public class HeslingtonHustle extends Game {
 		super.render();
 		// Handle input events
 		if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-			if (getScreen() == preferencesScreen) {
+			Screens main = Screens.MAIN;
+			if (!main.isLoaded()) return;
+			Screens preferencesScreen = Screens.PREFERENCES;
+			if (preferencesScreen.isCurrent()) {
 				// If currently on preferences screen, switch to the game screen
-				changeScreen(APPLICATION);
+				main.setAsCurrent();
 			} else {
 				// Otherwise, switch to preferences screen
-				changeScreen(PREFERENCES);
+				preferencesScreen.setAsCurrent();
 			}
 		}
+	}
+
+	@Override
+	public void dispose() {
+		super.dispose();
+		ImageAssets.disposeAll();
+		SkinAssets.disposeAll();
+		MapAssets.disposeAll();
+		Screens.disposeAll();
+		Statistics.dispose();
+		AudioManager musicManager = MusicManager.getInstance();
+		musicManager.onDisable();
+		AudioManager soundManager = SoundsManager.getInstance();
+		soundManager.onDisable();
 	}
 }
